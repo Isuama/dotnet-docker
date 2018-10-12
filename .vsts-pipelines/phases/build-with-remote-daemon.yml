@@ -1,14 +1,18 @@
+parameters:
+  phase: null
+  matrix: {}
+  dockerDemands: []
 phases:
-  - phase: Build_Linux_arm32v7
+  - phase: ${{ parameters.phase }}
     condition: or(eq(variables['singlePhase'], ''), eq(variables['singlePhase'], 'build'))
     dependsOn: GenerateMatrices
     queue:
       name: DotNetCore-Infra
       demands:
         - agent.os -equals linux
-        - DockerArch -equals arm32v7
+        - ${{ parameters.dockerDemands }}
       parallel: 100
-      matrix: $[ dependencies.GenerateMatrices.outputs['buildMatrix.buildMatrixLinuxArm32v7'] ]
+      matrix: ${{ parameters.matrix }}
     steps:
       - template: ../steps/docker-init-linux.yml
         parameters:

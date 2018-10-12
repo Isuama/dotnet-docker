@@ -18,7 +18,20 @@ phases:
   # Build Images
   ################################################################################
   - template: build-linux-amd64.yml
-  - template: build-linux-arm32v7.yml
+  - template: build-with-remote-daemon.yml
+    parameters:
+      phase: Build_Linux_arm32v7
+      dockerDemands:
+        - DockerOS -equals linux
+        - DockerArch -equals arm32v7
+      matrix: $[ dependencies.GenerateMatrices.outputs['buildMatrix.buildMatrixLinuxArm32v7'] ]
+  - template: build-with-remote-daemon.yml
+    parameters:
+      phase: Build_Linux_arm64v8
+      dockerDemands:
+        - DockerOS -equals linux
+        - DockerArch -equals arm64v8
+      matrix: $[ dependencies.GenerateMatrices.outputs['buildMatrix.buildMatrixLinuxArm64v8'] ]
   - template: build-windows-amd64.yml
     parameters:
       phase: Build_NanoServerSac2016_amd64
@@ -42,7 +55,22 @@ phases:
   # Test Images
   ################################################################################
   - template: test-linux-amd64.yml
-  - template: test-linux-arm32v7.yml
+  - template: test-with-remote-daemon.yml
+    parameters:
+      phase: Test_Linux_arm32v7
+      buildDependencies: Build_Linux_arm32v7
+      dockerDemands:
+        - DockerOS -equals linux
+        - DockerArch -equals arm32v7
+      matrix: $[ dependencies.GenerateMatrices.outputs['buildMatrix.testMatrixLinuxArm32v7'] ]
+  - template: test-with-remote-daemon.yml
+    parameters:
+      phase: Test_Linux_arm64v8
+      buildDependencies: Build_Linux_arm64v8
+      dockerDemands:
+        - DockerOS -equals linux
+        - DockerArch -equals arm64v8
+      matrix: $[ dependencies.GenerateMatrices.outputs['buildMatrix.testMatrixLinuxArm64v8'] ]
   - template: test-windows-amd64.yml
     parameters:
       phase: Test_NanoServerSac2016_amd64
@@ -81,6 +109,11 @@ phases:
       phase: Copy_Images_Linux_arm32v7
       architecture: arm
       matrix: $[ dependencies.GenerateMatrices.outputs['buildMatrix.buildMatrixLinuxArm32v7'] ]
+  - template: copy-images-linux.yml
+    parameters:
+      phase: Copy_Images_Linux_arm64v8
+      architecture: arm64
+      matrix: $[ dependencies.GenerateMatrices.outputs['buildMatrix.buildMatrixLinuxArm64v8'] ]
   - template: copy-images-windows.yml
     parameters:
       phase: Copy_Images_NanoServerSac2016_amd64

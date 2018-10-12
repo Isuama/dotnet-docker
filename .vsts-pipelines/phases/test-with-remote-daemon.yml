@@ -1,16 +1,21 @@
+parameters:
+  phase: null
+  matrix: {}
+  buildDependencies: []
+  dockerDemands: []
 phases:
-  - phase: Test_Linux_arm32v7
+  - phase: ${{ parameters.phase }}
     condition: and(ne(variables['repo'], 'dotnet-samples'), or(and(succeeded(), eq(variables['singlePhase'], '')), eq(variables['singlePhase'], 'test')))
     dependsOn:
-      - Build_Linux_arm32v7
       - GenerateMatrices
+      - ${{ parameters.buildDependencies }}
     queue:
       name: DotNetCore-Infra
       demands:
         - agent.os -equals linux
-        - DockerArch -equals arm32v7
+        - ${{ parameters.dockerDemands }}
       parallel: 100
-      matrix: $[ dependencies.GenerateMatrices.outputs['testMatrix.testMatrixLinuxArm32v7'] ]
+      matrix: ${{ parameters.matrix }}
     variables:
       testRunner.container: testrunner-$(System.JobId)
     steps:
